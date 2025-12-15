@@ -4,12 +4,7 @@
 INCLUDE generated/regions.ld
 INCLUDE generated/output_format.ld
 
-/* Define a single SRAM memory region at 0x10000000 (8 KiB) */
-MEMORY {
-    sram (rwx) : ORIGIN = 0x10000000, LENGTH = 0x00002000
-}
-
-/* Use SRAM for everything */
+/* Use sram (defined in regions.ld) for everything */
 REGION_ALIAS("REGION_TEXT", sram);
 REGION_ALIAS("REGION_RODATA", sram);
 REGION_ALIAS("REGION_DATA", sram);

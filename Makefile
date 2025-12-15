@@ -41,9 +41,13 @@ build: docker-build litex-build
 			-DLITEX_BUILD_DIR=$(LITEX_BUILD) && \
 			cmake --build $(BBUILD_DIR)'
 
+.PHONY: load
+load: litex-build
+	$(MAKE) -C $(BASE_DIR) $(BOARD_ARGS) load
+
 .PHONY: upload
 upload: build
-	$(MAKE) -C $(BASE_DIR) upload KERNEL=$(PWD)/$(BIN_PATH)
+	$(MAKE) -C $(BASE_DIR) upload $(BOARD_ARGS) KERNEL=$(PWD)/$(BIN_PATH)
 
 .PHONY: shell
 shell: docker-build

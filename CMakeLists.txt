@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(muTauPlatformIO C CXX)
+project(muTauPlatformIO C CXX ASM)  # Add ASM here
 
 # Path passed in: base/build/tang_nano_9k
 if(NOT DEFINED LITEX_BUILD_DIR)
@@ -41,21 +41,27 @@ message(STATUS "LiteX CFLAGS:  ${LITEX_CFLAGS}")
 message(STATUS "LiteX LDFLAGS: ${LITEX_LDFLAGS}")
 message(STATUS "LiteX LIBS:    ${LITEX_LIBS}")
 
-# Apply LiteX flags
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${LITEX_CFLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LITEX_CFLAGS}")
+# CRITICAL: Add RV32 architecture flags for the riscv64 toolchain
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -march=rv32i -mabi=ilp32 ${LITEX_CFLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv32i -mabi=ilp32 ${LITEX_CFLAGS}")
+set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -march=rv32i -mabi=ilp32")
 
-# Use LiteX LDFLAGS (adds regions.ld/output_format.ld from LITEX_GEN_DIR)
+# CRITICAL: Add RV32 linker emulation and flags
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -march=rv32i -mabi=ilp32")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LITEX_LDFLAGS}")
 
-# Add the search path for the generated linker scripts
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${LITEX_GEN_DIR}")
+# Add search path for INCLUDE directives in linker scripts
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${CMAKE_SOURCE_DIR}/${LITEX_BUILD_DIR}/software/include")
 
-# Add our SRAM-resident linker script on top
+# Add our SRAM-resident linker script
 set(CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} -T ${CMAKE_SOURCE_DIR}/linker.ld")
 
+# Prevent linking with standard libraries (bare metal)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib -nostartfiles")
+
 add_executable(${PROJECT_NAME}
+    src/crt0.S
     src/main.c
 )
 
