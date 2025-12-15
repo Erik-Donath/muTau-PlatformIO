@@ -29,8 +29,6 @@ RUN mkdir -p /opt/riscv-bin && \
 
 ENV PATH="/opt/riscv-bin:/opt/riscv-toolchain/bin:${PATH}"
 
-# Workdir inside the container
 WORKDIR /work
 
-# Default command is overridden from host (`docker run ... cmake --build ...`)
 CMD ["/bin/bash"]
